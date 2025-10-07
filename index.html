@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Editor Access Explorer</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>Editor Access Explorer</h1>
+    <p class="sub">Pick a table to see who can edit it, pick a user to see what they can edit, or pick a group to see all tables it grants edit access to.</p>
+  </header>
+
+  <section class="loaders">
+    <details open>
+      <summary>Data sources</summary>
+      <div class="loader-grid">
+        <div class="loader">
+          <label>groups_and_editors.json</label>
+          <div class="row">
+            <button id="btnLoadEditors" class="btn">Load default</button>
+            <input type="file" id="fileEditors" accept="application/json" />
+          </div>
+          <small>Map of <code>GROUP → [users]</code>. Example key: <code>GIS_ELECTION_EDITOR</code>.</small>
+        </div>
+        <div class="loader">
+          <label>groups_and_tables.json</label>
+          <div class="row">
+            <button id="btnLoadTables" class="btn">Load default</button>
+            <input type="file" id="fileTables" accept="application/json" />
+          </div>
+          <small>Map of <code>HRM\GROUP → [tables]</code>. Example key: <code>HRM\GIS_ELECTION_EDITOR</code>.</small>
+        </div>
+      </div>
+      <div class="status" id="status"></div>
+    </details>
+  </section>
+
+  <section class="tabs">
+    <div class="tab-buttons">
+      <button class="tab-btn active" data-tab="byTable">By Table</button>
+      <button class="tab-btn" data-tab="byUser">By User</button>
+      <button class="tab-btn" data-tab="byGroup">By Group</button>
+    </div>
+
+    <div class="tab-panel active" id="byTable">
+      <div class="controls">
+        <label>
+          Table
+          <select id="tableSelect"></select>
+        </label>
+        <input id="tableSearch" placeholder="Filter users by name" />
+        <button id="exportTableCsv" class="btn">Export CSV</button>
+      </div>
+
+      <div class="results two-col">
+        <div class="card">
+          <h3>Groups with edit permission</h3>
+          <ul id="tableGroups" class="chips"></ul>
+        </div>
+        <div class="card">
+          <h3>Users who can edit
+            <span id="tableNameLabel" class="muted"></span>
+          </h3>
+          <div id="tableUsers" class="user-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="byUser">
+      <div class="controls">
+        <label>
+          User
+          <select id="userSelect"></select>
+        </label>
+        <input id="userSearch" placeholder="Quick search users" />
+        <button id="exportUserCsv" class="btn">Export CSV</button>
+      </div>
+
+      <div class="results two-col">
+        <div class="card">
+          <h3>Groups this user is in</h3>
+          <ul id="userGroups" class="chips"></ul>
+        </div>
+        <div class="card">
+          <h3>Tables this user can edit
+            <span id="userNameLabel" class="muted"></span>
+          </h3>
+          <div id="userTables" class="table-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="byGroup">
+      <div class="controls">
+        <label>
+          Group
+          <select id="groupSelect"></select>
+        </label>
+        <input id="groupSearch" placeholder="Filter tables by name" />
+        <button id="exportGroupCsv" class="btn">Export CSV</button>
+      </div>
+
+      <div class="results two-col">
+        <div class="card">
+          <h3>Members of
+            <span id="groupNameLabel" class="muted"></span>
+          </h3>
+          <div id="groupMembers" class="user-list"></div>
+        </div>
+        <div class="card">
+          <h3>Tables editable via
+            <span id="groupNameLabel2" class="muted"></span>
+          </h3>
+          <div id="groupTables" class="table-list"></div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <footer class="app-footer">
+    <span>Tip: place the two JSON files in the same folder as this HTML file, then click “Load default”. You can also load custom files.</span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

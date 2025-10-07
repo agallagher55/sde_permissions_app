@@ -1,0 +1,332 @@
+{
+    "GIS_AREARATE_EDITOR": [
+        "Evans, Robbie",
+        "Marvin, Tristan"
+    ],
+    "GIS_AST_REG_EDITOR": [
+        "Covill, Erin",
+        "Hangle, Courtney",
+        "Horsman, Martha",
+        "MacMillan, Kirsten",
+        "Marvin, Tristan",
+        "Mills, Kirk",
+        "Poirier, Emma"
+    ],
+    "GIS_AST_TREE_EDITOR": [
+        "Covill, Erin",
+        "Grant, Iain",
+        "Hangle, Courtney",
+        "Jacobs-Peters, Frankie",
+        "Talbot, Darren"
+    ],
+    "GIS_BIKE_EDITOR": [
+        "Covill, Erin",
+        "Romaneh, Leen",
+        "Talbot, Darren",
+        "Witherbee, Siobhan"
+    ],
+    "GIS_BRIDGE_EDITOR": [
+        "Covill, Erin",
+        "Hangle, Courtney"
+    ],
+    "GIS_BUILDING_EDITOR": [
+        "Covill, Erin",
+        "Marvin, Tristan",
+        "O'Toole, Lisa",
+        "Parker, Melanie"
+    ],
+    "GIS_BUS_EDITOR": [
+        "Chang, Justin",
+        "Grace, Anthony",
+        "Hasan, Mehedi",
+        "Marvin, Tristan",
+        "Parker, Melanie",
+        "Redding, Colin",
+        "Talbot, Darren",
+        "Walker, Reuben"
+    ],
+    "GIS_CAPWORK_EDITOR": [
+        "Mills, Kirk",
+        "Whitman, Heather"
+    ],
+    "GIS_CENSUS_EDITOR": [
+        "O'Toole, Lisa"
+    ],
+    "GIS_CIVIC_EDITOR": [
+        "Aikenhead, Marie",
+        "Arblaster, Lisa",
+        "Cavers, Jared",
+        "Covill, Erin",
+        "England, Shannon",
+        "Fenner, Eleanor",
+        "Fodor, Andras",
+        "Hunter, Jenna",
+        "MacLatchie, Kate",
+        "Morrison, Hannah",
+        "Ogon, Fien-Eni",
+        "Parker, Melanie",
+        "Thomas, Holly"
+    ],
+    "GIS_ELECTION_EDITOR": [
+        "Covill, Erin",
+        "O'Toole, Lisa",
+        "Parker, Melanie",
+        "Talbot, Darren"
+    ],
+    "GIS_EMO_EDITOR": [
+        "Covill, Erin",
+        "Evans, Robbie",
+        "Marvin, Tristan",
+        "Talbot, Darren"
+    ],
+    "GIS_ENCAMPMENT_EDITOR": [
+        "Buchanan, Alyssa",
+        "Chauvin, Max",
+        "George, Wyatt",
+        "Hickey, Theresa",
+        "Hill, Mark",
+        "Hill, Scott",
+        "Malenfant, Francois",
+        "Nolan, Sara",
+        "Rice, Stephen",
+        "Whitzman, Rebecca"
+    ],
+    "GIS_ENCAMPMENT_VIEWER": [
+        "Akyol, Reyhan",
+        "Buchanan, Alyssa",
+        "Chauvin, Max",
+        "George, Wyatt",
+        "Hickey, Theresa",
+        "Hill, Mark",
+        "Hill, Scott",
+        "Hussini, Majd",
+        "Nolan, Sara",
+        "Rice, Stephen",
+        "Whitzman, Rebecca"
+    ],
+    "GIS_FINANCE_READER": [
+        "Akyol, Reyhan",
+        "Clarke, Maria",
+        "Covill, Erin",
+        "Evans, Robbie",
+        "Forbes, Kelsi",
+        "Gallagher, Alex",
+        "Lowe, Ryan",
+        "Malenfant, Francois",
+        "Marvin, Tristan",
+        "Miles, Peter",
+        "O'Toole, Lisa",
+        "Parker, Melanie",
+        "Talbot, Darren",
+        "Wilkinson, Elora",
+        "Wright, Vanessa"
+    ],
+    "GIS_FIRE_EDITOR": [
+        "Covill, Erin",
+        "Evans, Robbie",
+        "Marvin, Tristan"
+    ],
+    "GIS_FIRE_READER": [
+        "Nearing, Stephen",
+        "Parker, Melanie"
+    ],
+    "GIS_GAS_EDITOR": [
+        "Covill, Erin"
+    ],
+    "GIS_HRM_EDITINGAPP": [
+        "<No members>"
+    ],
+    "GIS_HRM_LAND_CEMETERY": [
+        "Lowe, Ryan",
+        "Malenfant, Francois",
+        "O'Toole, Lisa"
+    ],
+    "GIS_HRM_OUTDOOR_REC_EDITOR": [
+        "Hangle, Courtney"
+    ],
+    "GIS_HRM_REG_EDITOR_READER": [
+        "Akyol, Reyhan",
+        "O'Toole, Lisa"
+    ],
+    "GIS_HRM_SIDEWALK_ASSMT_EDITOR": [
+        "Witherbee, Siobhan"
+    ],
+    "GIS_HRM_STR_CLOS_ENCRH_EDITOR": [
+        "Clarke, Maria"
+    ],
+    "GIS_HRM_SURVEY_EDITOR": [
+        "Covill, Erin",
+        "Perkins, Janice"
+    ],
+    "GIS_HRM_TRAFFIC_STUDY_EDITOR": [
+        "Marvin, Tristan"
+    ],
+    "GIS_ICT_TRAFFIC_EDITOR": [
+        "<No members>"
+    ],
+    "GIS_LAND_EDITOR": [
+        "Covill, Erin",
+        "Forbes, Kelsi",
+        "Lowe, Ryan",
+        "Malenfant, Francois",
+        "Talbot, Darren"
+    ],
+    "GIS_LAND_READER": [
+        "England, Shannon",
+        "Fenner, Eleanor",
+        "Fodor, Andras",
+        "Hunter, Jenna",
+        "MacLatchie, Kate",
+        "Morrison, Hannah",
+        "Ogon, Fien-Eni",
+        "Thomas, Holly"
+    ],
+    "GIS_LIGHT_EDITOR": [
+        "Hangle, Courtney",
+        "Talbot, Darren"
+    ],
+    "GIS_LRS_EVENT_EDITOR": [
+        "Chang, Justin",
+        "Covill, Erin",
+        "Marvin, Tristan",
+        "Oxner, Scott",
+        "Parker, Melanie"
+    ],
+    "GIS_MAP_EDITOR": [
+        "Talbot, Darren"
+    ],
+    "GIS_PARCEL_EDITOR": [
+        "<No members>"
+    ],
+    "GIS_PARK_REC_ASSET_EDITOR": [
+        "Forbes, Kelsi",
+        "Hangle, Courtney",
+        "Lowe, Ryan",
+        "Malenfant, Francois"
+    ],
+    "GIS_POLICE_EDITOR": [
+        "Burns, Tim",
+        "Evans, Robbie",
+        "Parker, Melanie",
+        "Talbot, Darren"
+    ],
+    "GIS_REAL_EDITOR": [
+        "<No members>"
+    ],
+    "GIS_REGISTRYEDITORPARKSANDREC": [
+        "<No members>"
+    ],
+    "GIS_REGPLAN_EDITOR": [
+        "Aikenhead, Marie",
+        "Cavers, Jared",
+        "England, Shannon",
+        "Fenner, Eleanor",
+        "Fodor, Andras",
+        "Grant, Iain",
+        "Hunter, Jenna",
+        "MacLatchie, Kate",
+        "Morrison, Hannah",
+        "Ogon, Fien-Eni",
+        "Talbot, Darren",
+        "Thomas, Holly",
+        "Whitman, Heather"
+    ],
+    "GIS_ROW_EDITOR": [
+        "Covill, Erin",
+        "Marvin, Tristan",
+        "Talbot, Darren"
+    ],
+    "GIS_SECTRAV_EDITOR": [
+        "Covill, Erin"
+    ],
+    "GIS_SIDEWALK_EDITOR": [
+        "Lowe, Ryan",
+        "Marvin, Tristan",
+        "Parker, Melanie"
+    ],
+    "GIS_SIGN_EDITOR": [
+        "Aikenhead, Marie",
+        "Cavers, Jared",
+        "Covill, Erin",
+        "England, Shannon",
+        "Fenner, Eleanor",
+        "Fodor, Andras",
+        "Hangle, Courtney",
+        "Hunter, Jenna",
+        "MacLatchie, Kate",
+        "MacLean, Gayle",
+        "Morrison, Hannah",
+        "Ogon, Fien-Eni",
+        "Talbot, Darren",
+        "Thomas, Holly"
+    ],
+    "GIS_SNOWPLOW_EDITOR": [
+        "Marvin, Tristan",
+        "Parker, Melanie"
+    ],
+    "GIS_STREET_EDITOR": [
+        "Covill, Erin",
+        "Lowe, Ryan",
+        "Marvin, Tristan",
+        "Parker, Melanie"
+    ],
+    "GIS_STRNUM_EDITOR": [
+        "Aikenhead, Marie",
+        "Arblaster, Lisa",
+        "Cavers, Jared",
+        "England, Shannon",
+        "Fenner, Eleanor",
+        "Fodor, Andras",
+        "Hunter, Jenna",
+        "MacLatchie, Kate",
+        "MacLean, Gayle",
+        "Morrison, Hannah",
+        "Ogon, Fien-Eni",
+        "Parker, Melanie",
+        "Thomas, Holly"
+    ],
+    "GIS_STRRIVA_EDITOR": [
+        "Akyol, Reyhan"
+    ],
+    "GIS_TRAFFIC_EDITOR": [
+        "Covill, Erin",
+        "Marvin, Tristan",
+        "Mills, Kirk",
+        "Talbot, Darren"
+    ],
+    "GIS_TRAIL_EDITOR": [
+        "Covill, Erin",
+        "Lowe, Ryan",
+        "Marvin, Tristan",
+        "Parker, Melanie",
+        "Soto Trujillo, Marcela",
+        "Talbot, Darren"
+    ],
+    "GIS_TRANSP_PLANNING_EDITOR": [
+        "Asai, Fuki",
+        "Covill, Erin",
+        "Lanigan, Adam",
+        "Marvin, Tristan",
+        "Romaneh, Leen"
+    ],
+    "GIS_WASTE_EDITOR": [
+        "Talbot, Darren"
+    ],
+    "GIS_YAP_EDITOR": [
+        "Talbot, Darren"
+    ],
+    "GIS_ZONE_EDITOR": [
+        "Aikenhead, Marie",
+        "Arblaster, Lisa",
+        "Cavers, Jared",
+        "England, Shannon",
+        "Fenner, Eleanor",
+        "Fodor, Andras",
+        "Hunter, Jenna",
+        "MacLatchie, Kate",
+        "Morrison, Hannah",
+        "Ogon, Fien-Eni",
+        "Robertson, Cameron",
+        "Thomas, Holly"
+    ]
+}
