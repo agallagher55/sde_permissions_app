@@ -37,6 +37,16 @@ const els = {
   groupNameLabel2: document.getElementById('groupNameLabel2'),
   groupMembers: document.getElementById('groupMembers'),
   groupTables: document.getElementById('groupTables'),
+  // Report tab
+  reportSearch: document.getElementById('reportSearch'),
+  reportSelectVisible: document.getElementById('reportSelectVisible'),
+  reportClearAll: document.getElementById('reportClearAll'),
+  reportGenerate: document.getElementById('reportGenerate'),
+  exportReportCsv: document.getElementById('exportReportCsv'),
+  reportTableList: document.getElementById('reportTableList'),
+  reportSelCount: document.getElementById('reportSelCount'),
+  reportOutputLabel: document.getElementById('reportOutputLabel'),
+  reportResults: document.getElementById('reportResults'),
 };
 
 function setStatus(msg) { els.status.textContent = msg; }
@@ -128,6 +138,75 @@ function populateSelectors() {
   // Groups
   const groups = allShortGroups();
   els.groupSelect.innerHTML = groups.map(g => `<option value="${g}">${g}</option>`).join('');
+  // Report checklist
+  populateReportList(tables);
+}
+
+function populateReportList(tables) {
+  els.reportTableList.innerHTML = tables.map(t =>
+    `<label class="check-item"><input type="checkbox" value="${t}"><span class="code">${t}</span></label>`
+  ).join('');
+  els.reportTableList.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', updateReportSelCount);
+  });
+  updateReportSelCount();
+}
+
+function updateReportSelCount() {
+  const n = els.reportTableList.querySelectorAll('input:checked').length;
+  els.reportSelCount.textContent = n ? `(${n} selected)` : '';
+}
+
+function renderReport() {
+  const selected = Array.from(
+    els.reportTableList.querySelectorAll('input:checked')
+  ).map(cb => cb.value);
+
+  if (!selected.length) {
+    els.reportOutputLabel.textContent = '';
+    els.reportResults.innerHTML = '<div class="muted">No tables selected.</div>';
+    return;
+  }
+
+  els.reportOutputLabel.textContent = `(${selected.length} table${selected.length !== 1 ? 's' : ''})`;
+
+  els.reportResults.innerHTML = selected.map(t => {
+    const users = tablesToUsers[t] || [];
+    const userHtml = users.length
+      ? `<div class="user-list">${users.map(u => `
+          <div class="user">
+            <div class="name">${u.name}</div>
+            <div class="grants">${u.groups.map(g => `<span class="chip small code">${g}</span>`).join('')}</div>
+          </div>`).join('')}</div>`
+      : '<div class="muted">No users with edit access.</div>';
+    return `
+      <div class="report-section">
+        <div class="report-section-header">
+          <span class="tname">${t}</span>
+          <span class="muted">${users.length} user${users.length !== 1 ? 's' : ''}</span>
+        </div>
+        ${userHtml}
+      </div>`;
+  }).join('');
+}
+
+function exportCsvForReport() {
+  const selected = Array.from(
+    els.reportTableList.querySelectorAll('input:checked')
+  ).map(cb => cb.value);
+  if (!selected.length) return;
+
+  const rows = [['Table', 'User', 'Granting Group']];
+  for (const t of selected) {
+    for (const u of (tablesToUsers[t] || [])) {
+      if (!u.groups.length) {
+        rows.push([t, u.name, '']);
+      } else {
+        for (const g of u.groups) rows.push([t, u.name, g]);
+      }
+    }
+  }
+  downloadCsv(rows, 'report_multi_table_editors.csv');
 }
 
 function renderByTable(tableName, filterText = '') {
@@ -326,6 +405,29 @@ els.exportGroupCsv.addEventListener('click', () => {
   const g = els.groupSelect.value; if (!g) return;
   exportCsvForGroup(g);
 });
+
+// Report tab
+els.reportSearch.addEventListener('input', () => {
+  const q = els.reportSearch.value.trim().toLowerCase();
+  els.reportTableList.querySelectorAll('.check-item').forEach(item => {
+    item.style.display = (!q || item.querySelector('span').textContent.toLowerCase().includes(q)) ? '' : 'none';
+  });
+});
+
+els.reportSelectVisible.addEventListener('click', () => {
+  els.reportTableList.querySelectorAll('.check-item').forEach(item => {
+    if (item.style.display !== 'none') item.querySelector('input').checked = true;
+  });
+  updateReportSelCount();
+});
+
+els.reportClearAll.addEventListener('click', () => {
+  els.reportTableList.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+  updateReportSelCount();
+});
+
+els.reportGenerate.addEventListener('click', renderReport);
+els.exportReportCsv.addEventListener('click', exportCsvForReport);
 
 // Auto-attempt to load both defaults on first paint
 (async function bootstrap() {
