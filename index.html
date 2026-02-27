@@ -13,7 +13,7 @@
   </header>
 
   <section class="loaders">
-    <details open>
+    <details>
       <summary>Data sources</summary>
       <div class="loader-grid">
         <div class="loader">
@@ -39,17 +39,26 @@
 
   <section class="tabs">
     <div class="tab-buttons">
-      <button class="tab-btn active" data-tab="byTable">By Table</button>
+      <button class="tab-btn active" data-tab="byOverview">Overview</button>
+      <button class="tab-btn" data-tab="byTable">By Table</button>
       <button class="tab-btn" data-tab="byUser">By User</button>
       <button class="tab-btn" data-tab="byGroup">By Group</button>
       <button class="tab-btn" data-tab="byReport">Report</button>
     </div>
 
-    <div class="tab-panel active" id="byTable">
+    <div class="tab-panel active" id="byOverview">
+      <div class="overview-stats" id="overviewStats"></div>
+      <div class="controls">
+        <input id="overviewSearch" placeholder="Filter users by name" />
+      </div>
+      <div id="overviewList"></div>
+    </div>
+
+    <div class="tab-panel" id="byTable">
       <div class="controls">
         <label>
           Table
-          <select id="tableSelect" multiple></select>
+          <select id="tableSelect"></select>
         </label>
         <input id="tableSearch" placeholder="Filter users by name" />
         <button id="exportTableCsv" class="btn">Export CSV</button>
@@ -57,14 +66,16 @@
 
       <div class="results two-col">
         <div class="card">
-          <h3>Groups with edit permission</h3>
-          <ul id="tableGroups" class="chips"></ul>
+          <h3>Groups with edit permission <span id="tableGroupsCount" class="muted count"></span></h3>
+          <div class="card-body">
+            <ul id="tableGroups" class="chips"></ul>
+          </div>
         </div>
         <div class="card">
           <h3>Users who can edit
             <span id="tableNameLabel" class="muted"></span>
           </h3>
-          <div id="tableUsers" class="user-list"></div>
+          <div class="card-body" id="tableUsers"></div>
         </div>
       </div>
     </div>
@@ -73,7 +84,7 @@
       <div class="controls">
         <label>
           User
-          <select id="userSelect" multiple></select>
+          <select id="userSelect"></select>
         </label>
         <input id="userSearch" placeholder="Quick search users" />
         <button id="exportUserCsv" class="btn">Export CSV</button>
@@ -81,14 +92,16 @@
 
       <div class="results two-col">
         <div class="card">
-          <h3>Groups this user is in</h3>
-          <ul id="userGroups" class="chips"></ul>
+          <h3>Groups this user is in <span id="userGroupsCount" class="muted count"></span></h3>
+          <div class="card-body">
+            <ul id="userGroups" class="chips"></ul>
+          </div>
         </div>
         <div class="card">
           <h3>Tables this user can edit
             <span id="userNameLabel" class="muted"></span>
           </h3>
-          <div id="userTables" class="table-list"></div>
+          <div class="card-body" id="userTables"></div>
         </div>
       </div>
     </div>
@@ -97,7 +110,7 @@
       <div class="controls">
         <label>
           Group
-          <select id="groupSelect" multiple></select>
+          <select id="groupSelect"></select>
         </label>
         <input id="groupSearch" placeholder="Filter tables by name" />
         <button id="exportGroupCsv" class="btn">Export CSV</button>
@@ -107,14 +120,16 @@
         <div class="card">
           <h3>Members of
             <span id="groupNameLabel" class="muted"></span>
+            <span id="groupMembersCount" class="muted count"></span>
           </h3>
-          <div id="groupMembers" class="user-list"></div>
+          <div class="card-body" id="groupMembers"></div>
         </div>
         <div class="card">
           <h3>Tables editable via
             <span id="groupNameLabel2" class="muted"></span>
+            <span id="groupTablesCount" class="muted count"></span>
           </h3>
-          <div id="groupTables" class="table-list"></div>
+          <div class="card-body" id="groupTables"></div>
         </div>
       </div>
     </div>
@@ -143,7 +158,7 @@
   </section>
 
   <footer class="app-footer">
-    <span>Tip: place the two JSON files in the same folder as this HTML file, then click “Load default”. You can also load custom files.</span>
+    <span>Tip: place the two JSON files in the same folder as this HTML file, then click "Load default". You can also load custom files.</span>
   </footer>
 
   <script src="app.js"></script>
