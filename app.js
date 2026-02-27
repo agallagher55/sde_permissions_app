@@ -55,7 +55,6 @@ const els = {
 };
 
 function setStatus(msg) { els.status.textContent = msg; }
-function selectedValues(sel) { return Array.from(sel.selectedOptions).map(o => o.value); }
 
 // Helpers
 async function loadDefaultEditors() {
@@ -215,36 +214,21 @@ function exportCsvForReport() {
   downloadCsv(rows, 'report_multi_table_editors.csv');
 }
 
-function renderByTable(tableNames, filterText = '') {
-  const label = tableNames.length === 1 ? `(${tableNames[0]})` : tableNames.length > 1 ? `(${tableNames.length} tables)` : '';
-  els.tableNameLabel.textContent = label;
-  // groups — union across all selected tables
-  const groupSet = new Set();
-  for (const t of tableNames) {
-    for (const g of (tablesToGroups[t] || [])) groupSet.add(g.replace(/^HRM\\/, ''));
-  }
-  const groups = Array.from(groupSet).sort();
-  if (tableGroupFilter && !groups.includes(tableGroupFilter)) tableGroupFilter = null;
+function renderByTable(tableName, filterText = '') {
+  els.tableNameLabel.textContent = tableName ? `(${tableName})` : '';
+  // groups
+  const groups = (tablesToGroups[tableName] || []).map(g => g.replace(/^HRM\\/, '')).sort();
   els.tableGroups.innerHTML = groups.map(g =>
     `<li class="chip clickable${tableGroupFilter === g ? ' active' : ''}" data-group="${g}"><span class="code">${g}</span></li>`
   ).join('');
   els.tableGroups.querySelectorAll('.chip').forEach(chip => {
     chip.addEventListener('click', () => {
       tableGroupFilter = tableGroupFilter === chip.dataset.group ? null : chip.dataset.group;
-      renderByTable(tableNames, els.tableSearch.value);
+      renderByTable(tableName, els.tableSearch.value);
     });
   });
-  // users — union across all selected tables, merging granting groups per user
-  const userMap = new Map();
-  for (const t of tableNames) {
-    for (const u of (tablesToUsers[t] || [])) {
-      if (!userMap.has(u.name)) userMap.set(u.name, new Set());
-      for (const g of u.groups) userMap.get(u.name).add(g);
-    }
-  }
-  let list = Array.from(userMap.entries())
-    .map(([name, gs]) => ({ name, groups: Array.from(gs).sort() }))
-    .sort((a, b) => a.name.localeCompare(b.name));
+  // users — filter by name search and active group chip
+  let list = tablesToUsers[tableName] || [];
   const f = filterText.trim().toLowerCase();
   if (f) list = list.filter(x => x.name.toLowerCase().includes(f));
   if (tableGroupFilter) list = list.filter(u => u.groups.includes(tableGroupFilter));
@@ -256,34 +240,27 @@ function renderByTable(tableNames, filterText = '') {
   `).join('');
 }
 
-function renderByUser(userNames) {
-  const label = userNames.length === 1 ? `(${userNames[0]})` : userNames.length > 1 ? `(${userNames.length} users)` : '';
-  els.userNameLabel.textContent = label;
-  // groups — union across all selected users
-  const groupSet = new Set();
-  for (const u of userNames) {
-    for (const g of (usersToGroups[u] || [])) groupSet.add(g);
-  }
-  const userGroupsShort = Array.from(groupSet).sort();
-  if (userGroupFilter && !userGroupsShort.includes(userGroupFilter)) userGroupFilter = null;
+function renderByUser(userName) {
+  els.userNameLabel.textContent = userName ? `(${userName})` : '';
+  const userGroupsShort = (usersToGroups[userName] || []).slice().sort();
   els.userGroups.innerHTML = userGroupsShort.map(g =>
     `<li class="chip clickable${userGroupFilter === g ? ' active' : ''}" data-group="${g}"><span class="code">${g}</span></li>`
   ).join('');
   els.userGroups.querySelectorAll('.chip').forEach(chip => {
     chip.addEventListener('click', () => {
       userGroupFilter = userGroupFilter === chip.dataset.group ? null : chip.dataset.group;
-      renderByUser(userNames);
+      renderByUser(userName);
     });
   });
-  // tables — union across all selected users
+
+  // tables granted by any of user's groups
+  const userGroupsHrmed = userGroupsShort.map(g => `HRM\\${g}`);
   const grantTables = new Map(); // table -> Set(groups)
-  for (const userName of userNames) {
-    for (const g of (usersToGroups[userName] || [])) {
-      const gHr = `HRM\\${g}`;
-      for (const t of (groupsToTables[gHr] || [])) {
-        if (!grantTables.has(t)) grantTables.set(t, new Set());
-        grantTables.get(t).add(g);
-      }
+  for (const gHr of userGroupsHrmed) {
+    const tables = groupsToTables[gHr] || [];
+    for (const t of tables) {
+      if (!grantTables.has(t)) grantTables.set(t, new Set());
+      grantTables.get(t).add(gHr.replace(/^HRM\\/, ''));
     }
   }
   let rows = Array.from(grantTables.entries()).sort((a, b) => a[0].localeCompare(b[0]));
@@ -296,73 +273,58 @@ function renderByUser(userNames) {
   `).join('');
 }
 
-function renderByGroup(groupNames, filterText = '') {
-  const label = groupNames.length === 1 ? `(${groupNames[0]})` : groupNames.length > 1 ? `(${groupNames.length} groups)` : '';
-  els.groupNameLabel.textContent = label;
-  els.groupNameLabel2.textContent = label;
+function renderByGroup(groupName, filterText = '') {
+  els.groupNameLabel.textContent = groupName ? `(${groupName})` : '';
+  els.groupNameLabel2.textContent = groupName ? `(${groupName})` : '';
 
-  // Members — union across all selected groups
-  const memberSet = new Set();
-  for (const g of groupNames) {
-    for (const m of (groupsToUsers[g] || [])) {
-      if (m !== '<No members>') memberSet.add(m);
-    }
-  }
-  const members = Array.from(memberSet).sort();
-  els.groupMembers.innerHTML = members.map(n => `
+  // Members
+  const members = (groupsToUsers[groupName] || []).filter(n => n !== '<No members>');
+  els.groupMembers.innerHTML = (members.length ? members : []).map(n => `
     <div class="user"><div class="name">${n}</div></div>
   `).join('') || '<div class="muted">No known members</div>';
 
-  // Tables — union across all selected groups
-  const tableSet = new Set();
-  for (const g of groupNames) {
-    for (const t of (groupsToTables[`HRM\\${g}`] || [])) tableSet.add(t);
-  }
+  // Tables
+  const gHr = `HRM\\${groupName}`;
+  const tables = (groupsToTables[gHr] || []).slice().sort();
   const f = filterText.trim().toLowerCase();
-  let tables = Array.from(tableSet).sort();
-  if (f) tables = tables.filter(t => t.toLowerCase().includes(f));
-  els.groupTables.innerHTML = tables.map(t => `
+  const filtered = f ? tables.filter(t => t.toLowerCase().includes(f)) : tables;
+  els.groupTables.innerHTML = filtered.map(t => `
     <div class="table-card"><div class="tname">${t}</div></div>
   `).join('') || '<div class="muted">No tables mapped for this group</div>';
 }
 
-function exportCsvForTable(tableNames) {
+function exportCsvForTable(tableName) {
   const rows = [['Table', 'User', 'Granting Group']];
-  for (const t of tableNames) {
-    for (const u of (tablesToUsers[t] || [])) {
-      if (!u.groups.length) rows.push([t, u.name, '']);
-      for (const g of u.groups) rows.push([t, u.name, g]);
-    }
+  const list = tablesToUsers[tableName] || [];
+  for (const u of list) {
+    if (!u.groups.length) rows.push([tableName, u.name, '']);
+    for (const g of u.groups) rows.push([tableName, u.name, g]);
   }
-  const fname = tableNames.length === 1 ? `table_${tableNames[0]}_editors.csv` : 'table_multi_editors.csv';
-  downloadCsv(rows, fname);
+  downloadCsv(rows, `table_${tableName}_editors.csv`);
 }
 
-function exportCsvForUser(userNames) {
+function exportCsvForUser(userName) {
   const rows = [['User', 'Table', 'Granting Group']];
+  const groups = usersToGroups[userName] || [];
   const seen = new Set();
-  for (const u of userNames) {
-    for (const g of (usersToGroups[u] || [])) {
-      const gHr = `HRM\\${g}`;
-      for (const t of (groupsToTables[gHr] || [])) {
-        const key = `${u}|${t}|${g}`;
-        if (seen.has(key)) continue;
-        seen.add(key);
-        rows.push([u, t, g]);
-      }
+  for (const g of groups) {
+    const gHr = `HRM\\${g}`;
+    for (const t of (groupsToTables[gHr] || [])) {
+      const key = `${userName}|${t}|${g}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      rows.push([userName, t, g]);
     }
   }
-  const fname = userNames.length === 1 ? `user_${userNames[0].replace(/[^a-z0-9]+/gi, '_')}_tables.csv` : 'user_multi_tables.csv';
-  downloadCsv(rows, fname);
+  downloadCsv(rows, `user_${userName.replace(/[^a-z0-9]+/gi, '_')}_tables.csv`);
 }
 
-function exportCsvForGroup(groupNames) {
+function exportCsvForGroup(groupName) {
+  const gHr = `HRM\\${groupName}`;
+  const tables = groupsToTables[gHr] || [];
   const rows = [['Group', 'Table']];
-  for (const g of groupNames) {
-    for (const t of (groupsToTables[`HRM\\${g}`] || [])) rows.push([g, t]);
-  }
-  const fname = groupNames.length === 1 ? `group_${groupNames[0].replace(/[^a-z0-9]+/gi, '_')}_tables.csv` : 'group_multi_tables.csv';
-  downloadCsv(rows, fname);
+  for (const t of tables) rows.push([groupName, t]);
+  downloadCsv(rows, `group_${groupName.replace(/[^a-z0-9]+/gi, '_')}_tables.csv`);
 }
 
 function downloadCsv(rows, filename) {
@@ -408,9 +370,9 @@ els.btnLoadTables.addEventListener('click', async () => {
     normalizeAndIndex(groupsToUsers, groupsToTables);
     populateSelectors();
     // initial renders
-    const tv = selectedValues(els.tableSelect); if (tv.length) renderByTable(tv);
-    const uv = selectedValues(els.userSelect); if (uv.length) renderByUser(uv);
-    const gv = selectedValues(els.groupSelect); if (gv.length) renderByGroup(gv);
+    if (els.tableSelect.value) renderByTable(els.tableSelect.value);
+    if (els.userSelect.value) renderByUser(els.userSelect.value);
+    if (els.groupSelect.value) renderByGroup(els.groupSelect.value);
   } catch (e) { setStatus('Failed to load tables.'); console.error(e); }
 });
 
@@ -431,48 +393,46 @@ els.fileTables.addEventListener('change', async (ev) => {
     setStatus(`Loaded tables from file: ${f.name}`);
     normalizeAndIndex(groupsToUsers, groupsToTables);
     populateSelectors();
-    const tv = selectedValues(els.tableSelect); if (tv.length) renderByTable(tv);
-    const uv = selectedValues(els.userSelect); if (uv.length) renderByUser(uv);
-    const gv = selectedValues(els.groupSelect); if (gv.length) renderByGroup(gv);
+    if (els.tableSelect.value) renderByTable(els.tableSelect.value);
+    if (els.userSelect.value) renderByUser(els.userSelect.value);
+    if (els.groupSelect.value) renderByGroup(els.groupSelect.value);
   } catch (e) { setStatus('Failed to parse tables JSON.'); console.error(e); }
 });
 
 // Selectors and search
 els.tableSelect.addEventListener('change', () => {
   tableGroupFilter = null;
-  renderByTable(selectedValues(els.tableSelect), els.tableSearch.value);
+  renderByTable(els.tableSelect.value, els.tableSearch.value);
 });
-els.tableSearch.addEventListener('input', () => renderByTable(selectedValues(els.tableSelect), els.tableSearch.value));
+els.tableSearch.addEventListener('input', () => renderByTable(els.tableSelect.value, els.tableSearch.value));
 
 els.userSelect.addEventListener('change', () => {
   userGroupFilter = null;
-  renderByUser(selectedValues(els.userSelect));
+  renderByUser(els.userSelect.value);
 });
 els.userSearch.addEventListener('input', () => {
   const q = els.userSearch.value.trim().toLowerCase();
   const all = Object.keys(usersToGroups).sort();
   const filt = q ? all.filter(u => u.toLowerCase().includes(q)) : all;
-  const prev = new Set(selectedValues(els.userSelect));
-  els.userSelect.innerHTML = filt.map(u => `<option value="${u}"${prev.has(u) ? ' selected' : ''}>${u}</option>`).join('');
-  const cur = selectedValues(els.userSelect);
-  if (cur.length) renderByUser(cur);
+  els.userSelect.innerHTML = filt.map(u => `<option value="${u}">${u}</option>`).join('');
+  if (els.userSelect.value) renderByUser(els.userSelect.value);
 });
 
-els.groupSelect.addEventListener('change', () => renderByGroup(selectedValues(els.groupSelect), els.groupSearch.value));
-els.groupSearch.addEventListener('input', () => renderByGroup(selectedValues(els.groupSelect), els.groupSearch.value));
+els.groupSelect.addEventListener('change', () => renderByGroup(els.groupSelect.value, els.groupSearch.value));
+els.groupSearch.addEventListener('input', () => renderByGroup(els.groupSelect.value, els.groupSearch.value));
 
 // Exports
 els.exportTableCsv.addEventListener('click', () => {
-  const ts = selectedValues(els.tableSelect); if (!ts.length) return;
-  exportCsvForTable(ts);
+  const t = els.tableSelect.value; if (!t) return;
+  exportCsvForTable(t);
 });
 els.exportUserCsv.addEventListener('click', () => {
-  const us = selectedValues(els.userSelect); if (!us.length) return;
-  exportCsvForUser(us);
+  const u = els.userSelect.value; if (!u) return;
+  exportCsvForUser(u);
 });
 els.exportGroupCsv.addEventListener('click', () => {
-  const gs = selectedValues(els.groupSelect); if (!gs.length) return;
-  exportCsvForGroup(gs);
+  const g = els.groupSelect.value; if (!g) return;
+  exportCsvForGroup(g);
 });
 
 // Report tab

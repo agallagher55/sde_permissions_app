@@ -136,7 +136,7 @@ details > summary {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  align-items: flex-start;
+  align-items: center;
   margin: 14px 0;
 }
 
@@ -158,22 +158,6 @@ input[placeholder] {
   border-radius: 10px;
   min-width: 260px;
   outline: none;
-}
-
-select[multiple] {
-  height: 160px;
-  padding: 4px;
-  resize: vertical;
-}
-
-select[multiple] option {
-  padding: 5px 8px;
-  border-radius: 6px;
-}
-
-select[multiple] option:checked {
-  background: linear-gradient(rgba(247, 147, 26, 0.35), rgba(247, 147, 26, 0.35));
-  color: var(--accent-2);
 }
 
 select:focus,
