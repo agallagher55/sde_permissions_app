@@ -10,6 +10,8 @@ let tablesToUsers = {};         // "TABLE_A" -> [{name, groups:[...]}, ...]
 
 // Active group filter for By Table tab (null = show all)
 let tableGroupFilter = null;
+// Active group filter for By User tab (null = show all)
+let userGroupFilter = null;
 
 // DOM
 const els = {
@@ -241,7 +243,15 @@ function renderByTable(tableName, filterText = '') {
 function renderByUser(userName) {
   els.userNameLabel.textContent = userName ? `(${userName})` : '';
   const userGroupsShort = (usersToGroups[userName] || []).slice().sort();
-  els.userGroups.innerHTML = userGroupsShort.map(g => `<li class="chip"><span class="code">${g}</span></li>`).join('');
+  els.userGroups.innerHTML = userGroupsShort.map(g =>
+    `<li class="chip clickable${userGroupFilter === g ? ' active' : ''}" data-group="${g}"><span class="code">${g}</span></li>`
+  ).join('');
+  els.userGroups.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      userGroupFilter = userGroupFilter === chip.dataset.group ? null : chip.dataset.group;
+      renderByUser(userName);
+    });
+  });
 
   // tables granted by any of user's groups
   const userGroupsHrmed = userGroupsShort.map(g => `HRM\\${g}`);
@@ -253,7 +263,8 @@ function renderByUser(userName) {
       grantTables.get(t).add(gHr.replace(/^HRM\\/, ''));
     }
   }
-  const rows = Array.from(grantTables.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+  let rows = Array.from(grantTables.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+  if (userGroupFilter) rows = rows.filter(([, gs]) => gs.has(userGroupFilter));
   els.userTables.innerHTML = rows.map(([t, gs]) => `
     <div class="table-card">
       <div class="tname">${t}</div>
@@ -395,7 +406,10 @@ els.tableSelect.addEventListener('change', () => {
 });
 els.tableSearch.addEventListener('input', () => renderByTable(els.tableSelect.value, els.tableSearch.value));
 
-els.userSelect.addEventListener('change', () => renderByUser(els.userSelect.value));
+els.userSelect.addEventListener('change', () => {
+  userGroupFilter = null;
+  renderByUser(els.userSelect.value);
+});
 els.userSearch.addEventListener('input', () => {
   const q = els.userSearch.value.trim().toLowerCase();
   const all = Object.keys(usersToGroups).sort();
