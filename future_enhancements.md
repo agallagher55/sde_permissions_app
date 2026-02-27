@@ -4,6 +4,8 @@ Quality-of-life improvements scoped to keep the project simple and maintainable.
 
 ---
 
+## Enable light-mode
+
 ## Data Collection (main.py)
 
 ### Auto-detect monthly CSV path
