@@ -8,6 +8,10 @@ let groupsToTables = {};        // "HRM\\GIS_XYZ" -> ["TABLE_A", ...]
 let tablesToGroups = {};        // "TABLE_A" -> ["HRM\\GIS_XYZ", ...]
 let tablesToUsers = {};         // "TABLE_A" -> [{name, groups:[...]}, ...]
 
+// Timestamps of the last-loaded JSON files (Date | null)
+let editorsLastModified = null;
+let tablesLastModified = null;
+
 // Active group filter for By Table tab (null = show all)
 let tableGroupFilter = null;
 // Active group filter for By User tab (null = show all)
@@ -49,6 +53,7 @@ const els = {
   // Report tab
   overviewSearch: document.getElementById('overviewSearch'),
   overviewStats: document.getElementById('overviewStats'),
+  overviewMeta: document.getElementById('overviewMeta'),
   overviewList: document.getElementById('overviewList'),
   reportSearch: document.getElementById('reportSearch'),
   reportSelectVisible: document.getElementById('reportSelectVisible'),
@@ -63,12 +68,23 @@ const els = {
 
 function setStatus(msg) { els.status.textContent = msg; }
 
+function formatDate(d) {
+  if (!d) return 'unknown';
+  return d.toLocaleDateString('en-CA', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
 // Helpers
 async function loadDefaultEditors() {
-  return fetch('groups_and_editors.json').then(r => r.json());
+  const r = await fetch('groups_and_editors.json');
+  const lm = r.headers.get('Last-Modified');
+  if (lm) editorsLastModified = new Date(lm);
+  return r.json();
 }
 async function loadDefaultTables() {
-  return fetch('groups_and_tables.json').then(r => r.json());
+  const r = await fetch('groups_and_tables.json');
+  const lm = r.headers.get('Last-Modified');
+  if (lm) tablesLastModified = new Date(lm);
+  return r.json();
 }
 function readFileAsJson(file) {
   return new Promise((resolve, reject) => {
@@ -235,6 +251,8 @@ function renderOverview() {
     <div class="stat-card"><div class="stat-value">${totalGroups}</div><div class="stat-label">Groups</div></div>
     <div class="stat-card"><div class="stat-value">${totalTables}</div><div class="stat-label">Tables</div></div>
   `;
+  els.overviewMeta.textContent =
+    `Data snapshot — editors: ${formatDate(editorsLastModified)}  ·  tables: ${formatDate(tablesLastModified)}`;
 
   overviewRanked = Object.entries(usersToGroups)
     .map(([name, groups]) => {
@@ -475,10 +493,9 @@ els.btnLoadTables.addEventListener('click', async () => {
     const data = await loadDefaultTables();
     groupsToTables = data;
     setStatus('Loaded tables.');
-    // After both sides are present, normalize and render
     normalizeAndIndex(groupsToUsers, groupsToTables);
     populateSelectors();
-    // initial renders
+    renderOverview();
     if (els.tableSelect.value) renderByTable(els.tableSelect.value);
     if (els.userSelect.value) renderByUser(els.userSelect.value);
     if (els.groupSelect.value) renderByGroup(els.groupSelect.value);
@@ -490,6 +507,7 @@ els.fileEditors.addEventListener('change', async (ev) => {
   try {
     const data = await readFileAsJson(f);
     groupsToUsers = data;
+    editorsLastModified = new Date(f.lastModified);
     setStatus(`Loaded editors from file: ${f.name}`);
   } catch (e) { setStatus('Failed to parse editors JSON.'); console.error(e); }
 });
@@ -499,6 +517,7 @@ els.fileTables.addEventListener('change', async (ev) => {
   try {
     const data = await readFileAsJson(f);
     groupsToTables = data;
+    tablesLastModified = new Date(f.lastModified);
     setStatus(`Loaded tables from file: ${f.name}`);
     normalizeAndIndex(groupsToUsers, groupsToTables);
     populateSelectors();
