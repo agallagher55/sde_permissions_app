@@ -233,6 +233,14 @@ input[type="file"] {
 
 .chip.small { font-size: 12px; }
 
+.chip.active {
+  border-color: var(--accent);
+  background: rgba(247, 147, 26, 0.15);
+  color: var(--accent);
+}
+
+.chip.clickable { cursor: pointer; }
+
 .code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
