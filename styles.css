@@ -207,7 +207,26 @@ input[type="file"] {
 
 .card h3 { margin: 0 0 10px; font-size: 16px; }
 
+.card-body {
+  overflow-y: auto;
+  max-height: 520px;
+}
+
 .muted { color: var(--muted); font-weight: 400; margin-left: 6px; }
+
+.count { font-size: 12px; }
+
+.group-section { margin-bottom: 14px; }
+.group-section:last-child { margin-bottom: 0; }
+
+.group-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 4px 6px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2px;
+}
 
 .chips {
   list-style: none;

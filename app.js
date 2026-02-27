@@ -27,12 +27,14 @@ const els = {
   tableUsers: document.getElementById('tableUsers'),
   tableSearch: document.getElementById('tableSearch'),
   tableNameLabel: document.getElementById('tableNameLabel'),
+  tableGroupsCount: document.getElementById('tableGroupsCount'),
   exportTableCsv: document.getElementById('exportTableCsv'),
   userSelect: document.getElementById('userSelect'),
   userGroups: document.getElementById('userGroups'),
   userTables: document.getElementById('userTables'),
   userSearch: document.getElementById('userSearch'),
   userNameLabel: document.getElementById('userNameLabel'),
+  userGroupsCount: document.getElementById('userGroupsCount'),
   exportUserCsv: document.getElementById('exportUserCsv'),
   // New group view elements
   groupSelect: document.getElementById('groupSelect'),
@@ -41,7 +43,9 @@ const els = {
   groupNameLabel: document.getElementById('groupNameLabel'),
   groupNameLabel2: document.getElementById('groupNameLabel2'),
   groupMembers: document.getElementById('groupMembers'),
+  groupMembersCount: document.getElementById('groupMembersCount'),
   groupTables: document.getElementById('groupTables'),
+  groupTablesCount: document.getElementById('groupTablesCount'),
   // Report tab
   reportSearch: document.getElementById('reportSearch'),
   reportSelectVisible: document.getElementById('reportSelectVisible'),
@@ -215,9 +219,9 @@ function exportCsvForReport() {
 }
 
 function renderByTable(tableName, filterText = '') {
-  els.tableNameLabel.textContent = tableName ? `(${tableName})` : '';
   // groups
   const groups = (tablesToGroups[tableName] || []).map(g => g.replace(/^HRM\\/, '')).sort();
+  els.tableGroupsCount.textContent = groups.length ? `(${groups.length})` : '';
   els.tableGroups.innerHTML = groups.map(g =>
     `<li class="chip clickable${tableGroupFilter === g ? ' active' : ''}" data-group="${g}"><span class="code">${g}</span></li>`
   ).join('');
@@ -227,22 +231,46 @@ function renderByTable(tableName, filterText = '') {
       renderByTable(tableName, els.tableSearch.value);
     });
   });
+
   // users — filter by name search and active group chip
   let list = tablesToUsers[tableName] || [];
   const f = filterText.trim().toLowerCase();
   if (f) list = list.filter(x => x.name.toLowerCase().includes(f));
   if (tableGroupFilter) list = list.filter(u => u.groups.includes(tableGroupFilter));
-  els.tableUsers.innerHTML = list.map(u => `
-    <div class="user">
-      <div class="name">${u.name}</div>
-      <div class="grants">${u.groups.map(g => `<span class="chip small code">${g}</span>`).join('')}</div>
-    </div>
-  `).join('');
+
+  // Update header label with table name and user count
+  const userCount = list.length;
+  els.tableNameLabel.textContent = tableName
+    ? `(${tableName}${userCount ? ` · ${userCount} user${userCount !== 1 ? 's' : ''}` : ''})`
+    : '';
+
+  // Group users by their granting group; if only one group exists skip headers
+  const activeGroups = tableGroupFilter ? [tableGroupFilter] : groups;
+  if (activeGroups.length <= 1) {
+    // Flat list — no group headers needed
+    els.tableUsers.innerHTML = list.map(u => `
+      <div class="user"><div class="name">${u.name}</div></div>
+    `).join('');
+  } else {
+    // Grouped by granting group
+    els.tableUsers.innerHTML = activeGroups.map(g => {
+      const inGroup = list.filter(u => u.groups.includes(g));
+      if (!inGroup.length) return '';
+      return `
+        <div class="group-section">
+          <div class="group-section-header">
+            <span class="chip small clickable code">${g}</span>
+            <span class="muted count">${inGroup.length} user${inGroup.length !== 1 ? 's' : ''}</span>
+          </div>
+          ${inGroup.map(u => `<div class="user"><div class="name">${u.name}</div></div>`).join('')}
+        </div>`;
+    }).join('');
+  }
 }
 
 function renderByUser(userName) {
-  els.userNameLabel.textContent = userName ? `(${userName})` : '';
   const userGroupsShort = (usersToGroups[userName] || []).slice().sort();
+  els.userGroupsCount.textContent = userGroupsShort.length ? `(${userGroupsShort.length})` : '';
   els.userGroups.innerHTML = userGroupsShort.map(g =>
     `<li class="chip clickable${userGroupFilter === g ? ' active' : ''}" data-group="${g}"><span class="code">${g}</span></li>`
   ).join('');
@@ -253,24 +281,36 @@ function renderByUser(userName) {
     });
   });
 
-  // tables granted by any of user's groups
-  const userGroupsHrmed = userGroupsShort.map(g => `HRM\\${g}`);
-  const grantTables = new Map(); // table -> Set(groups)
-  for (const gHr of userGroupsHrmed) {
-    const tables = groupsToTables[gHr] || [];
-    for (const t of tables) {
-      if (!grantTables.has(t)) grantTables.set(t, new Set());
-      grantTables.get(t).add(gHr.replace(/^HRM\\/, ''));
-    }
+  // Build group -> sorted tables map for the active groups
+  const activeGroups = userGroupFilter ? [userGroupFilter] : userGroupsShort;
+  let totalTables = 0;
+  const groupTableMap = activeGroups.map(g => {
+    const tables = (groupsToTables[`HRM\\${g}`] || []).slice().sort();
+    totalTables += tables.length;
+    return { g, tables };
+  }).filter(({ tables }) => tables.length > 0);
+
+  // Update header label with user name and total table count
+  els.userNameLabel.textContent = userName
+    ? `(${userName}${totalTables ? ` · ${totalTables} table${totalTables !== 1 ? 's' : ''}` : ''})`
+    : '';
+
+  // Grouped by granting group; flat list when only one group
+  if (activeGroups.length <= 1) {
+    const tables = groupTableMap[0]?.tables || [];
+    els.userTables.innerHTML = tables.map(t => `
+      <div class="table-card"><div class="tname">${t}</div></div>
+    `).join('');
+  } else {
+    els.userTables.innerHTML = groupTableMap.map(({ g, tables }) => `
+      <div class="group-section">
+        <div class="group-section-header">
+          <span class="chip small clickable code">${g}</span>
+          <span class="muted count">${tables.length} table${tables.length !== 1 ? 's' : ''}</span>
+        </div>
+        ${tables.map(t => `<div class="table-card"><div class="tname">${t}</div></div>`).join('')}
+      </div>`).join('');
   }
-  let rows = Array.from(grantTables.entries()).sort((a, b) => a[0].localeCompare(b[0]));
-  if (userGroupFilter) rows = rows.filter(([, gs]) => gs.has(userGroupFilter));
-  els.userTables.innerHTML = rows.map(([t, gs]) => `
-    <div class="table-card">
-      <div class="tname">${t}</div>
-      <div class="grants">${Array.from(gs).sort().map(g => `<span class="chip small code">${g}</span>`).join('')}</div>
-    </div>
-  `).join('');
 }
 
 function renderByGroup(groupName, filterText = '') {
@@ -279,7 +319,8 @@ function renderByGroup(groupName, filterText = '') {
 
   // Members
   const members = (groupsToUsers[groupName] || []).filter(n => n !== '<No members>');
-  els.groupMembers.innerHTML = (members.length ? members : []).map(n => `
+  els.groupMembersCount.textContent = members.length ? `(${members.length})` : '';
+  els.groupMembers.innerHTML = members.map(n => `
     <div class="user"><div class="name">${n}</div></div>
   `).join('') || '<div class="muted">No known members</div>';
 
@@ -288,6 +329,7 @@ function renderByGroup(groupName, filterText = '') {
   const tables = (groupsToTables[gHr] || []).slice().sort();
   const f = filterText.trim().toLowerCase();
   const filtered = f ? tables.filter(t => t.toLowerCase().includes(f)) : tables;
+  els.groupTablesCount.textContent = filtered.length ? `(${filtered.length})` : '';
   els.groupTables.innerHTML = filtered.map(t => `
     <div class="table-card"><div class="tname">${t}</div></div>
   `).join('') || '<div class="muted">No tables mapped for this group</div>';
