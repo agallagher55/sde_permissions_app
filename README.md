@@ -1,4 +1,5 @@
-![Editor Access Explorer interface](images/interface_preview.png)
+![Uploading image.png…]()
+
 
 # SDE Permissions App — Editor Access Explorer
 
