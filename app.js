@@ -8,6 +8,9 @@ let groupsToTables = {};        // "HRM\\GIS_XYZ" -> ["TABLE_A", ...]
 let tablesToGroups = {};        // "TABLE_A" -> ["HRM\\GIS_XYZ", ...]
 let tablesToUsers = {};         // "TABLE_A" -> [{name, groups:[...]}, ...]
 
+// Active group filter for By Table tab (null = show all)
+let tableGroupFilter = null;
+
 // DOM
 const els = {
   status: document.getElementById('status'),
@@ -212,13 +215,22 @@ function exportCsvForReport() {
 function renderByTable(tableName, filterText = '') {
   els.tableNameLabel.textContent = tableName ? `(${tableName})` : '';
   // groups
-  const groups = (tablesToGroups[tableName] || []).map(g => g.replace(/^HRM\\/, ''));
-  els.tableGroups.innerHTML = groups.sort().map(g => `<li class="chip"><span class="code">${g}</span></li>`).join('');
-  // users
-  const list = tablesToUsers[tableName] || [];
+  const groups = (tablesToGroups[tableName] || []).map(g => g.replace(/^HRM\\/, '')).sort();
+  els.tableGroups.innerHTML = groups.map(g =>
+    `<li class="chip clickable${tableGroupFilter === g ? ' active' : ''}" data-group="${g}"><span class="code">${g}</span></li>`
+  ).join('');
+  els.tableGroups.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      tableGroupFilter = tableGroupFilter === chip.dataset.group ? null : chip.dataset.group;
+      renderByTable(tableName, els.tableSearch.value);
+    });
+  });
+  // users — filter by name search and active group chip
+  let list = tablesToUsers[tableName] || [];
   const f = filterText.trim().toLowerCase();
-  const filtered = f ? list.filter(x => x.name.toLowerCase().includes(f)) : list;
-  els.tableUsers.innerHTML = filtered.map(u => `
+  if (f) list = list.filter(x => x.name.toLowerCase().includes(f));
+  if (tableGroupFilter) list = list.filter(u => u.groups.includes(tableGroupFilter));
+  els.tableUsers.innerHTML = list.map(u => `
     <div class="user">
       <div class="name">${u.name}</div>
       <div class="grants">${u.groups.map(g => `<span class="chip small code">${g}</span>`).join('')}</div>
@@ -377,7 +389,10 @@ els.fileTables.addEventListener('change', async (ev) => {
 });
 
 // Selectors and search
-els.tableSelect.addEventListener('change', () => renderByTable(els.tableSelect.value, els.tableSearch.value));
+els.tableSelect.addEventListener('change', () => {
+  tableGroupFilter = null;
+  renderByTable(els.tableSelect.value, els.tableSearch.value);
+});
 els.tableSearch.addEventListener('input', () => renderByTable(els.tableSelect.value, els.tableSearch.value));
 
 els.userSelect.addEventListener('change', () => renderByUser(els.userSelect.value));
