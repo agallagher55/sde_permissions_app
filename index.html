@@ -39,13 +39,22 @@
 
   <section class="tabs">
     <div class="tab-buttons">
-      <button class="tab-btn active" data-tab="byTable">By Table</button>
+      <button class="tab-btn active" data-tab="byOverview">Overview</button>
+      <button class="tab-btn" data-tab="byTable">By Table</button>
       <button class="tab-btn" data-tab="byUser">By User</button>
       <button class="tab-btn" data-tab="byGroup">By Group</button>
       <button class="tab-btn" data-tab="byReport">Report</button>
     </div>
 
-    <div class="tab-panel active" id="byTable">
+    <div class="tab-panel active" id="byOverview">
+      <div class="overview-stats" id="overviewStats"></div>
+      <div class="controls">
+        <input id="overviewSearch" placeholder="Filter users by name" />
+      </div>
+      <div id="overviewList"></div>
+    </div>
+
+    <div class="tab-panel" id="byTable">
       <div class="controls">
         <label>
           Table

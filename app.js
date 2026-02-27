@@ -47,6 +47,9 @@ const els = {
   groupTables: document.getElementById('groupTables'),
   groupTablesCount: document.getElementById('groupTablesCount'),
   // Report tab
+  overviewSearch: document.getElementById('overviewSearch'),
+  overviewStats: document.getElementById('overviewStats'),
+  overviewList: document.getElementById('overviewList'),
   reportSearch: document.getElementById('reportSearch'),
   reportSelectVisible: document.getElementById('reportSelectVisible'),
   reportClearAll: document.getElementById('reportClearAll'),
@@ -216,6 +219,70 @@ function exportCsvForReport() {
     }
   }
   downloadCsv(rows, 'report_multi_table_editors.csv');
+}
+
+// ── Overview ─────────────────────────────────────────────────────────────────
+
+let overviewRanked = []; // cached on data load, re-used by search filter
+
+function renderOverview() {
+  const totalUsers = Object.keys(usersToGroups).length;
+  const totalGroups = allShortGroups().length;
+  const totalTables = Object.keys(tablesToGroups).length;
+
+  els.overviewStats.innerHTML = `
+    <div class="stat-card"><div class="stat-value">${totalUsers}</div><div class="stat-label">Users</div></div>
+    <div class="stat-card"><div class="stat-value">${totalGroups}</div><div class="stat-label">Groups</div></div>
+    <div class="stat-card"><div class="stat-value">${totalTables}</div><div class="stat-label">Tables</div></div>
+  `;
+
+  overviewRanked = Object.entries(usersToGroups)
+    .map(([name, groups]) => {
+      const sorted = groups.slice().sort();
+      const tableSet = new Set();
+      for (const g of sorted) {
+        for (const t of (groupsToTables[`HRM\\${g}`] || [])) tableSet.add(t);
+      }
+      return { name, groups: sorted, tableCount: tableSet.size };
+    })
+    .sort((a, b) => b.groups.length - a.groups.length || a.name.localeCompare(b.name));
+
+  renderOverviewList(overviewRanked, els.overviewSearch.value);
+}
+
+function renderOverviewList(ranked, filterText) {
+  const f = filterText.trim().toLowerCase();
+  const filtered = f ? ranked.filter(u => u.name.toLowerCase().includes(f)) : ranked;
+
+  const MAX_CHIPS = 5;
+  els.overviewList.innerHTML = filtered.map(u => {
+    const shown = u.groups.slice(0, MAX_CHIPS);
+    const extra = u.groups.length - shown.length;
+    const chips = shown.map(g => `<span class="chip small code">${g}</span>`).join('');
+    const more = extra > 0 ? `<span class="chip small muted">+${extra} more</span>` : '';
+    return `
+      <div class="overview-user" data-user="${u.name}">
+        <div class="overview-user-main">
+          <span class="overview-user-name">${u.name}</span>
+          <span class="badge-groups">${u.groups.length} group${u.groups.length !== 1 ? 's' : ''}</span>
+          <span class="badge-tables">${u.tableCount} table${u.tableCount !== 1 ? 's' : ''}</span>
+        </div>
+        <div class="overview-user-groups">${chips}${more}</div>
+      </div>`;
+  }).join('') || '<div class="muted">No users found.</div>';
+
+  els.overviewList.querySelectorAll('.overview-user').forEach(row => {
+    row.addEventListener('click', () => {
+      const name = row.dataset.user;
+      els.tabBtns.forEach(b => b.classList.remove('active'));
+      els.tabPanels.forEach(p => p.classList.remove('active'));
+      document.querySelector('[data-tab="byUser"]').classList.add('active');
+      document.getElementById('byUser').classList.add('active');
+      els.userSelect.value = name;
+      userGroupFilter = null;
+      renderByUser(name);
+    });
+  });
 }
 
 function renderByTable(tableName, filterText = '') {
@@ -435,6 +502,7 @@ els.fileTables.addEventListener('change', async (ev) => {
     setStatus(`Loaded tables from file: ${f.name}`);
     normalizeAndIndex(groupsToUsers, groupsToTables);
     populateSelectors();
+    renderOverview();
     if (els.tableSelect.value) renderByTable(els.tableSelect.value);
     if (els.userSelect.value) renderByUser(els.userSelect.value);
     if (els.groupSelect.value) renderByGroup(els.groupSelect.value);
@@ -442,6 +510,8 @@ els.fileTables.addEventListener('change', async (ev) => {
 });
 
 // Selectors and search
+els.overviewSearch.addEventListener('input', () => renderOverviewList(overviewRanked, els.overviewSearch.value));
+
 els.tableSelect.addEventListener('change', () => {
   tableGroupFilter = null;
   renderByTable(els.tableSelect.value, els.tableSearch.value);
