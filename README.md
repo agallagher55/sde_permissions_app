@@ -1,4 +1,4 @@
-![Uploading image.png…]()
+<img width="1914" height="670" alt="image" src="https://github.com/user-attachments/assets/f3b632b9-a9bc-4742-9372-e9ac04b4eed8" />
 
 
 # SDE Permissions App — Editor Access Explorer
